@@ -22,7 +22,7 @@ const authentificate = async (key) => {
 const getList = async (auth, smsKey) => {
   const calendar = google.calendar({ version: "v3", auth });
   calendar.events.list(
-    { calendarId: CALENDAR_ID, timeMin: new Date().toISOString(), maxResults: 10, singleEvents: true, orderBy: "startTime" },
+    { calendarId: CALENDAR_ID, timeMin: new Date().toISOString(), maxResults: 15, singleEvents: true, orderBy: "startTime" },
     (err, res) => {
       if (err) return console.log(err);
       const events = res.data.items;
@@ -30,11 +30,13 @@ const getList = async (auth, smsKey) => {
         const sms = new SMSru(smsKey);
         events.forEach((event) => {
           if (event.description) {
-            const start = event.start.dateTime || event.start.date;
+            const start = new Date(event.start.dateTime || event.start.date);
+            const hour = start.getHours();
+            const minutes = start.getMinutes() < 10 ? "0" + start.getMinutes() : start.getMunutes();
             const now = new Date();
-            const delta = (new Date(start).getTime() - now.getTime()) / 36e5;
+            const delta = (start.getTime() - now.getTime()) / 36e5;
             if (delta < 24 && delta > 23)
-              sms.sms_send({ to: event.description, text: `Вы записаны` }, (e) => {
+              sms.sms_send({ to: event.description, text: `Вы записаны в ${hour}:${minutes}`, from: "ThePlace" }, (e) => {
                 console.log(e.description);
               });
           }
