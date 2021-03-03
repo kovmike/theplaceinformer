@@ -19,6 +19,9 @@ const authentificate = async (key) => {
   return jwtClient;
 };
 
+const addZero = (count) => {
+  return count < 10 ? "0" + count : count;
+};
 const getList = async (auth, smsKey, calendarID) => {
   const calendar = google.calendar({ version: "v3", auth });
   calendar.events.list(
@@ -31,15 +34,19 @@ const getList = async (auth, smsKey, calendarID) => {
         events.forEach((event) => {
           if (event.description) {
             const start = new Date(event.start.dateTime || event.start.date);
-            const day = start.getDate();
-            const month = start.getMonth() + 1;
+            const day = addZero(start.getDate());
+            const month = addZero(start.getMonth() + 1);
             const hour = start.getHours();
-            const minutes = start.getMinutes() < 10 ? "0" + start.getMinutes() : start.getMinutes();
+            const minutes = addZero(start.getMinutes());
             const now = new Date();
             const delta = (start.getTime() - now.getTime()) / 36e5;
             if (delta < 24 && delta > 23)
               sms.sms_send(
-                { to: event.description, text: `Вы записаны на ${day}.${month} в ${hour}:${minutes}`, from: "ThePlace" },
+                {
+                  to: event.description,
+                  text: `Анна Ковальчук ждет Вас ${day}.${month} в ${hour}:${minutes}, +79201888101`,
+                  from: "ThePlace",
+                },
                 (e) => {
                   console.log(e.description);
                 }
